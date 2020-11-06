@@ -1,5 +1,18 @@
 import tensorflow as tf
 
+def batch_tensor(tensor, batch_size):
+    """
+        Batches a tensor
+        Args:
+            tensor, a tensor of shape *
+            batch_size, the batch_size
+        Returns:
+            a tensor of shape (batch_size, *) witht the tensor repeated in each
+            batch entry
+    """
+    batch = tf.expand_dims(tensor, axis=0)
+    return tf.repeat(batch, batch_size, axis=0)
+
 def get_random_bool():
     """
         Generates a random bool scalar tensor

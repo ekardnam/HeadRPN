@@ -76,6 +76,22 @@ def generate_coordinate_grid(height, width, anchor_count):
     coordinates = tf.expand_dims(coordinates, axis=2)
     return tf.tile(coordinates, [1, 1, anchor_count, 2])
 
+def generate_anchor_grid(config):
+    """
+        Generates the anchors in a grid
+        Args:
+            config, the configuation dictionary
+        Returns:
+            anchors, a tensor of shape (output_heigh, output_width, anchor_count, 4 [x1, y1, x2, y2])
+                     containing the anchors relative to the output of the RPN
+    """
+    anchor_count = config['anchor_count']
+    output_height, output_width = config['output_size']
+
+    coordinates_grid = generate_coordinate_grid(output_height, output_width, anchor_count)
+    base_anchors = generate_base_anchors(config)
+    base_anchors_grid = broadcast_base_anchors_to_grid(base_anchors, output_height, output_width)
+    return tf.clip_by_value(base_anchors_grid + coordinates_grid, 0, 1)
 
 def generate_anchors(config):
     """
@@ -86,14 +102,8 @@ def generate_anchors(config):
             anchors, a tensor of shape (output_height * output_width * anchor_count, 4 [x1, y1, x2, y2])
                      containing the anchors relative to the output of the RPN
     """
-    anchor_count = config['anchor_count']
-    output_height, output_width = config['output_size']
-
-    coordinates_grid = generate_coordinate_grid(output_height, output_width, anchor_count)
-    base_anchors = generate_base_anchors(config)
-    base_anchors_grid = broadcast_base_anchors_to_grid(base_anchors, output_height, output_width)
-    anchors = tf.reshape(coordinates_grid + base_anchors_grid, [-1, 4])
-    return tf.clip_by_value(anchors, 0, 1)
+    anchor_grid = generate_anchor_grid(config)
+    return tf.reshape(anchor_grid, [-1, 4])
 
 def get_bbox_width_height(bbox):
     width = bbox[..., 2] - bbox[..., 0]
@@ -164,6 +174,7 @@ def denormalize_bboxes(bboxes, height, width):
         Returns:
             the denormalized bboxes in a shape (batch_size, total_bboxes, 4)
     """
+    bboxes = tf.cast(bboxes, tf.float32)
     x1 = bboxes[..., 0] * width
     y1 = bboxes[..., 1] * height
     x2 = bboxes[..., 2] * width
@@ -181,3 +192,20 @@ def normalize_bboxes(bboxes, height, width):
             the normalized bboxes in a shape (batch_size, total_bboxes, 4)
     """
     return denormalize_bboxes(bboxes, 1/height, 1/width)
+
+def get_bounding_boxes_from_classifier_output(classifier_output, config, threshold=0.5):
+    """
+        Returns a bounding box tensor from the given classifier_output
+        Each output is converted into the corresponding bounding box if greater then threshold
+        Args:
+            classifier_output, the RPN classifier output, has shape (output_height, output_width, anchor_count)
+            config,            the configuration dictionary
+            threshold,        the threshold, defaults to 0.5
+        Returns:
+            a bounding box tensor of shape (total_positive_anchors, 4)
+    """
+    output_height, output_width = config['output_size']
+    anchor_count = config['anchor_count']
+    mask = tf.greater(classifier_output, threshold)
+    anchor_grid = generate_anchor_grid(config)
+    return tf.boolean_mask(anchor_grid, mask)

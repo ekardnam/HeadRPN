@@ -107,12 +107,12 @@ class BboxTestCase(tf.test.TestCase):
         self.assertAllClose(deltas, real_deltas)
 
     def test_get_iou_map(self):
-        gt_boxes = tf.constant([
+        gt_boxes = tf.constant([[
             [.1, .1, .6, .6]
-        ])
-        bboxes = tf.constant([
+        ]])
+        bboxes = tf.constant([[
             [.05, .05, .61, .61]
-        ])
+        ]])
         gt_boxes_batch = tf.expand_dims(gt_boxes, 0)
         bboxes_batch = tf.expand_dims(bboxes, 0)
         iou_map = get_iou_map(bboxes_batch, gt_boxes_batch)

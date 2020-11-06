@@ -8,7 +8,13 @@ DEFAULT_CONFIGURATION_PROTO = {
     'base_model_stride': 16,
 
     'anchor_scales': [32, 64],
-    'anchor_ratios': [1]
+    'anchor_ratios': [1],
+
+    'batch_size': 32,
+    'region_count': 32,
+
+    'high_threshold': 0.7,
+    'low_threshold': 0.3
 
 }
 
