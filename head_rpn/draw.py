@@ -7,7 +7,7 @@ def draw_image_batch(name, image_batch, max_images=-1):
             name,        a name for the resulting TensorBoard
             image_batch, the image batch to draw
             max_images,  the max amount of images to display
-                         if -1 displays all images
+                         if -1 displays 3 images
     """
     if max_images != -1:
         tf.summary.image(name, image_batch, max_outputs=max_images, step=0)
