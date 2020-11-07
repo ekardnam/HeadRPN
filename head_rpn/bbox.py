@@ -1,5 +1,7 @@
 import tensorflow as tf
 
+from .data import batch_tensor
+
 def generate_base_anchors(config):
     """
         Operation that generates the base anchor shapes from the data in configuration
@@ -170,7 +172,7 @@ def denormalize_bboxes(bboxes, height, width):
         Args:
             bboxes, a batch of bboxes of shape (batch_size, total_bboxes, 4)
             height, the height
-            width, the width
+            width,  the width
         Returns:
             the denormalized bboxes in a shape (batch_size, total_bboxes, 4)
     """
@@ -187,25 +189,54 @@ def normalize_bboxes(bboxes, height, width):
         Args:
             bboxes, a batch of bboxes of shape (batch_size, total_bboxes, 4)
             height, the height
-            width, the width
+            width,  the width
         Returns:
             the normalized bboxes in a shape (batch_size, total_bboxes, 4)
     """
     return denormalize_bboxes(bboxes, 1/height, 1/width)
 
-def get_bounding_boxes_from_classifier_output(classifier_output, config, threshold=0.5):
+def get_bounding_boxes_from_labels(labels, config, threshold=0.5):
     """
-        Returns a bounding box tensor from the given classifier_output
+        Returns a bounding box tensor from the given labels
         Each output is converted into the corresponding bounding box if greater then threshold
         Args:
-            classifier_output, the RPN classifier output, has shape (output_height, output_width, anchor_count)
+            labels, the RPN classifier output, has shape (batch_size, output_height, output_width, anchor_count)
             config,            the configuration dictionary
             threshold,        the threshold, defaults to 0.5
         Returns:
-            a bounding box tensor of shape (total_positive_anchors, 4)
+            a bounding box tensor of shape (batch_size, total_positive_anchors, 4)
     """
     output_height, output_width = config['output_size']
     anchor_count = config['anchor_count']
-    mask = tf.greater(classifier_output, threshold)
-    anchor_grid = generate_anchor_grid(config)
-    return tf.boolean_mask(anchor_grid, mask)
+    batch_size = tf.shape(labels)[0]
+    labels = tf.reshape(labels, [batch_size, -1])
+    mask = tf.greater(labels, threshold)
+    return tf.where(tf.expand_dims(mask, axis=-1), batch_tensor(generate_anchors(config), batch_size), 0.0)
+
+def apply_deltas_to_bounding_boxes(bboxes, deltas):
+    """
+        Applies the given deltas to the given bounding boxes
+        Args:
+            bboxes, a tensor containing batches of bounding boxes
+                    has shape (batch_size, bbox_count, 4)
+            deltas, a tensor containing batches of deltas
+                    has shape (batch_size, bbox_count, 4)
+        Returns:
+            the batch of bounding boxes with the deltas applied
+    """
+    width = bboxes[..., 2] - bboxes[..., 0]
+    height = bboxes[..., 3] - bboxes[..., 1]
+    centre_x = 0.5 * (bboxes[..., 0] + bboxes[..., 2])
+    centre_y = 0.5 * (bboxes[..., 1] + bboxes[..., 3])
+
+    result_width = tf.math.exp(deltas[..., 2]) * width
+    result_height = tf.math.exp(deltas[..., 3]) * height
+    result_centre_x = (deltas[..., 0] * width) + centre_x
+    result_centre_y = (deltas[..., 1] * height) + centre_y
+
+    x1 = result_centre_x - result_width * 0.5
+    x2 = result_centre_x + result_width * 0.5
+    y1 = result_centre_y - result_height * 0.5
+    y2 = result_centre_y + result_height * 0.5
+
+    return tf.stack([x1, y1, x2, y2], axis=-1)
