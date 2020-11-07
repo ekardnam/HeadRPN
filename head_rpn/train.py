@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from .data import batch_tensor
-from .bbox import get_iou_map
+from .bbox import get_iou_map, get_regressor_deltas
 
 def randomly_select_n_from_mask(mask, n):
     """
@@ -33,7 +33,7 @@ def get_target(anchors, gt_boxes, config):
             gt_boxes, a tensor of shape (batch_size, total_gt_boxes, 4)
             config, the configuration dictionary
         Returns:
-            classifier_output, the output of the RPN classifier
+            labels, the output of the RPN classifier
             regressor_output, the output of the RPN regressor
     """
     batch_size = tf.shape(gt_boxes)[0]
@@ -47,12 +47,16 @@ def get_target(anchors, gt_boxes, config):
 
     # contains at position (batch_idx, gt_idx) the index of the best anchor
     # for the gt box indexed by gt_idx in the batch indexed by batch_idx
-    max_idx_for_each_gt = tf.argmax(iou_map, axis=1, output_type=tf.int32)
+    max_anchor_idx_foreach_gt = tf.argmax(iou_map, axis=1, output_type=tf.int32)
+
+    # contains at position (batch_idx, anchor_idx) the index of the best gt box
+    # for the anchor indexed by anchor_idx in the batch indexed by batch_id
+    max_gt_idx_foreach_anchor = tf.argmax(iou_map, axis=2, output_type=tf.int32)
 
     batch_indices = tf.range(0, batch_size)
     batch_indices = tf.expand_dims(batch_indices, 1)
     batch_indices = tf.repeat(batch_indices, total_gt_boxes, axis=1)
-    best_anchor_for_gt_indices = tf.stack([batch_indices, max_idx_for_each_gt], axis=-1)
+    best_anchor_for_gt_indices = tf.stack([batch_indices, max_anchor_idx_foreach_gt], axis=-1)
     best_anchor_for_gt_indices = tf.reshape(best_anchor_for_gt_indices, [-1, 2])
     indices_count = tf.shape(best_anchor_for_gt_indices)[0]
 
@@ -72,11 +76,21 @@ def get_target(anchors, gt_boxes, config):
 
     negative_anchors = randomly_select_n_from_mask(negative_anchors, negative_count)
 
-    classifier_output = tf.where(positive_anchors, 1.0, -1.0)
-    classifier_output = tf.add(classifier_output, tf.cast(negative_anchors, tf.float32))
+    labels = tf.where(positive_anchors, 1.0, -1.0)
+    labels = tf.add(labels, tf.cast(negative_anchors, tf.float32))
     # in the unlikely event that an anchor whose iou is less than 0.3
     # but its the best fitting anchor for any ground truth box we need to
     # clip possible value of 2.0 to 1.0
-    classifier_output = tf.clip_by_value(classifier_output, -1.0, 1.0)
+    labels = tf.clip_by_value(labels, -1.0, 1.0)
 
-    return tf.reshape(classifier_output, [batch_size, output_height, output_width, anchor_count]), 0.0
+    # find the best fitting gt box for each anchor
+    # this tensor has shape (batch_size, total_anchors, 4)
+    gt_boxes_foreach_anchor = tf.gather(gt_boxes, max_gt_idx_foreach_anchor, batch_dims=1)
+    # replace non positve anchors with zeros
+    gt_boxes_foreach_anchor = tf.where(tf.expand_dims(positive_anchors, -1), gt_boxes_foreach_anchor, 0.0)
+
+    deltas = get_regressor_deltas(anchors, gt_boxes_foreach_anchor)
+
+    labels = tf.reshape(labels, [batch_size, output_height, output_width, anchor_count])
+    deltas = tf.reshape(deltas, [batch_size, output_height, output_width, anchor_count * 4])
+    return labels, deltas
