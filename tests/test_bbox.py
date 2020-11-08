@@ -105,16 +105,3 @@ class BboxTestCase(tf.test.TestCase):
             [[0.03571431,  0.03571431, -0.1133287,  -0.1133287]]
         )
         self.assertAllClose(deltas, real_deltas)
-
-    def test_get_iou_map(self):
-        gt_boxes = tf.constant([[
-            [.1, .1, .6, .6]
-        ]])
-        bboxes = tf.constant([[
-            [.05, .05, .61, .61]
-        ]])
-        gt_boxes_batch = tf.expand_dims(gt_boxes, 0)
-        bboxes_batch = tf.expand_dims(bboxes, 0)
-        iou_map = get_iou_map(bboxes_batch, gt_boxes_batch)
-        real_iou = tf.constant([[[0.7971939]]])
-        self.assertAllClose(iou_map, real_iou)
