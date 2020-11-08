@@ -3,6 +3,44 @@ import tensorflow as tf
 from .data import batch_tensor
 from .bbox import get_iou_map, get_regressor_deltas
 
+def classifier_loss(p_true, p_pred):
+    """
+        The classifier loss explained
+        This is basically binary cross entropy
+        Args:
+            p_true, the true propabilities
+            p_pred, the predicted probabilities
+        Returns:
+            the loss as a scalar
+    """
+    valid_indices = tf.where(tf.not_equal(p_true, -1.0))
+    p_true_valid = tf.gather_nd(p_true, valid_indices)
+    p_pred_valid = tf.gather_nd(p_pred, valid_indices)
+    binary_crossentropy = tf.keras.losses.BinaryCrossentropy()
+    return binary_crossentropy(p_true_valid, p_pred_valid)
+
+def regressor_loss(t_true, t_pred):
+    """
+        The regressor loss
+        This is smooth L1 loss calculated only on positive anchors
+        Args:
+            t_true, the true regressor values
+            t_pred, the predicted regressor values
+        Returns:
+            the loss as a scalar
+    """
+    smooth_l1 = tf.keras.losses.Huber(reduction=tf.keras.losses.Reduction.NONE)
+    batch_size = tf.shape(t_pred)[0]
+    t_true = tf.reshape(t_true, [batch_size, -1, 4])
+    t_pred = tf.reshape(t_pred, [batch_size, -1, 4])
+    loss = smooth_l1(t_true, t_pred)
+    valid = tf.math.reduce_any(tf.not_equal(t_true, 0.0), axis=-1)
+    valid = tf.cast(valid, tf.float32)
+    loss = tf.reduce_sum(loss * valid, axis=-1) # loss vector for each batch
+    total_pos_boxes = tf.math.maximum(1.0, tf.reduce_sum(valid, axis=-1))
+    return tf.math.reduce_mean(tf.truediv(loss, total_pos_boxes))
+
+
 def randomly_select_n_from_mask(mask, n):
     """
         Select n True values from the given boolean mask
