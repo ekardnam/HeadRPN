@@ -1,6 +1,6 @@
 # HeadRPN
 
-An implementation of a RPN for head detection as proposed in [this paper](https://arxiv.org/pdf/1809.08766v3.pdf).
+An implementation of a RPN for head detection as proposed in [this paper](https://arxiv.org/pdf/1809.08766v1.pdf).
 
 ## Licensing
 This project is licensed under the terms of the GNU GPL v3 license.
