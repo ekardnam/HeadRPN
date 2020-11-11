@@ -7,7 +7,11 @@ import tensorflow as tf
 
 import argparse
 
-from head_rpn.dataset import load_kaggle_annotations
+from head_rpn.dataset import (
+    load_kaggle_annotations,
+    load_scut_annotations,
+    aggregate_annotations
+)
 from math import ceil
 
 TFRECORD_IMG_COUNT = 200
@@ -24,13 +28,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Creates TFRecord files from a given Kaggle dataset')
     parser.add_argument('labels', type=str, help='Path to the labels.csv file')
     parser.add_argument('boxes', type=str, help='Path to the boxes.csv file')
-    parser.add_argument('basepath', type=str, help='The base path for the images in the dataset')
+    parser.add_argument('scut_annotations_folder', type=str, help='The folder containing SCUT annotations')
+    parser.add_argument('kaggle_basepath', type=str, help='The base path for the Kaggle images')
+    parser.add_argument('scut_basepath', type=str, help='The base path for SCUT images')
     parser.add_argument('--out', type=str, default='out/data-{}.tfrecord', help='Format string for output TFRecords')
     parser.add_argument('--img-count', type=int, default=TFRECORD_IMG_COUNT, help='The number of images in each TFRecord file')
 
     args = parser.parse_args()
 
-    annotations = load_kaggle_annotations(args.labels, args.boxes)
+    kaggle_annotations = load_kaggle_annotations(args.labels, args.boxes)
+    scut_annotations = load_scut_annotations(args.scut_annotations_folder)
+
+    annotations = aggregate_annotations(
+                                        [kaggle_annotations, scut_annotations],
+                                        [args.kaggle_basepath, args.scut_basepath]
+                                       )
+
+
     annotation_count = len(annotations)
 
     for i in range(ceil(annotation_count / TFRECORD_IMG_COUNT)):
@@ -38,7 +52,7 @@ if __name__ == '__main__':
         annotations_to_process = annotations[i * TFRECORD_IMG_COUNT : (i + 1) * TFRECORD_IMG_COUNT]
         with tf.python.python_io.TFRecordWriter(args.out.format(i)) as tfwriter:
             for annotation in annotations_to_process:
-                image = tf.io.read_file(os.path.join(args.basepath, annotation["image_filename"]))
+                image = tf.io.read_file(annotation["image_filename"])
                 example = tf.train.Example(features=tf.train.Features(feature={
                     'image': _bytes_feature(image.numpy()),
                     'image_width': _int64_feature(annotation['image_width']),
