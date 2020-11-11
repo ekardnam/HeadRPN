@@ -14,7 +14,7 @@ from head_rpn.dataset import (
 )
 from math import ceil
 
-TFRECORD_IMG_COUNT = 200
+TFRECORD_IMG_COUNT = 192
 
 def _bytes_feature(value):
     """Returns a bytes_list from a string / byte."""
