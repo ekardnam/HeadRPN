@@ -8,15 +8,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
 from head_rpn.dataset import load_kaggle_annotations
-from head_rpn.train import get_target
-from head_rpn.draw import draw_bounding_boxes, draw_image_batch
-from head_rpn.bbox import (
-    get_bounding_boxes_from_labels,
-    generate_anchors,
-    normalize_bboxes,
-    apply_deltas_to_bounding_boxes
-)
-from head_rpn.config import get_configuration
+from head_rpn.draw import draw_image_batch
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Visualize an image from a Kaggle dataset in TensorBoard')
