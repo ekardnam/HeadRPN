@@ -4,7 +4,7 @@ from .data import batch_tensor
 
 def generate_base_anchors(config):
     """
-        Operation that generates the base anchor shapes from the data in configuration
+        Generates the base anchor shapes from the data in configuration
         Args:
             config, the configuration dictionary
         Returns:
@@ -25,7 +25,7 @@ def generate_base_anchors(config):
 
 def broadcast_base_anchors_to_grid(base_anchors, height, width):
     """
-        Operation that broadcast the base_anchors tensor tiling it to fill the whole
+        Broadcasts the base_anchors tensor tiling it to fill the whole
         RPN output
         Args:
             base_anchors, the base anchor tensor
@@ -200,9 +200,9 @@ def get_bounding_boxes_from_labels(labels, config, threshold=0.5):
         Returns a bounding box tensor from the given labels
         Each output is converted into the corresponding bounding box if greater then threshold
         Args:
-            labels, the RPN classifier output, has shape (batch_size, output_height, output_width, anchor_count)
-            config,            the configuration dictionary
-            threshold,        the threshold, defaults to 0.5
+            labels,    the RPN classifier output, has shape (batch_size, output_height, output_width, anchor_count)
+            config,     the configuration dictionary
+            threshold, the threshold, defaults to 0.5
         Returns:
             a bounding box tensor of shape (batch_size, total_positive_anchors, 4)
     """

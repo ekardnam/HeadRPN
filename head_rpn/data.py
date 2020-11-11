@@ -4,7 +4,7 @@ def batch_tensor(tensor, batch_size):
     """
         Batches a tensor
         Args:
-            tensor, a tensor of shape *
+            tensor,     a tensor of shape *
             batch_size, the batch_size
         Returns:
             a tensor of shape (batch_size, *) witht the tensor repeated in each
@@ -23,10 +23,10 @@ def horizontal_flip(image, gt_boxes):
     """
         Flips the image horizontally
         Args:
-            image, the image tensor
+            image,    the image tensor
             gt_boxes, the normalized ground truth boxes tensor
         Returns:
-            image, flipped image
+            image,    flipped image
             gt_boxes, flipped gt_boxes
     """
     flipped_image = tf.image.flip_left_right(image)
@@ -44,10 +44,10 @@ def process_data(image, gt_boxes, height, width, apply_augmentation=False):
     """
         Data processing operation
         Args:
-            image, the image
-            gt_boxes, the ground truth boxes
-            height, the height to resize the image data to
-            width, the width to resize the image data to
+            image,              the image
+            gt_boxes,           the ground truth boxes
+            height,             the height to resize the image data to
+            width,              the width to resize the image data to
             apply_augmentation, whether to apply data augmentation
         Returns:
             image, a tensor containing the image of shape (height, width, channels)

@@ -7,7 +7,7 @@ def get_model(config, base_model_trainable=False):
     """
         Create the RPN model from the config
         Args:
-            config, the configuration
+            config,                the configuration
             base_model_trainable, whether to train the base model (defaults to False)
         Returns:
             the Keras RPN model

@@ -67,11 +67,11 @@ def get_target(anchors, gt_boxes, config):
     """
         Returns the RPN target for a batch of ground truth boxes
         Args:
-            anchors, a tensor of shape (output_height * output_width * anchor_count, 4)
-            gt_boxes, a tensor of shape (batch_size, total_gt_boxes, 4)
-            config, the configuration dictionary
+            anchors,  a anchor tensor of shape (output_height * output_width * anchor_count, 4)
+            gt_boxes, a ground truth box tensor of shape (batch_size, total_gt_boxes, 4)
+            config,    the configuration dictionary
         Returns:
-            labels, the output of the RPN classifier
+            labels,           the output of the RPN classifier
             regressor_output, the output of the RPN regressor
     """
     batch_size = tf.shape(gt_boxes)[0]
@@ -128,7 +128,7 @@ def get_target(anchors, gt_boxes, config):
     # replace non positve anchors with zeros
     gt_boxes_foreach_anchor = tf.where(tf.expand_dims(positive_anchors, -1), gt_boxes_foreach_anchor, 0.0)
 
-    deltas = get_regressor_deltas(anchors, gt_boxes_foreach_anchor) / variances 
+    deltas = get_regressor_deltas(anchors, gt_boxes_foreach_anchor) / variances
 
     labels = tf.reshape(labels, [batch_size, output_height, output_width, anchor_count])
     deltas = tf.reshape(deltas, [batch_size, output_height, output_width, anchor_count * 4])

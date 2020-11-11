@@ -22,7 +22,7 @@ def load_kaggle_annotations(labels_path, boxes_path):
         the dataset at https://www.kaggle.com/tensor2flow/head-detection-dataset
         Args:
             labels_path, a path to the labels.csv file
-            boxes_path, a path to the boxes.csv file
+            boxes_path,  a path to the boxes.csv file
         Returns:
             a list of image_annotation dictionaries
     """
@@ -90,8 +90,8 @@ def aggregate_annotations(annotation_lists, basepaths):
         Aggregates the annotations into a single list and add the corresponding
         basepath to each filename
         Args:
-            annotation_lists,  the datasets to aggregate
-            basepaths,          the basepath for each dataset
+            annotation_lists, the datasets to aggregate
+            basepaths,        the basepath for each dataset
         Returns:
             the aggregated annotations
     """
