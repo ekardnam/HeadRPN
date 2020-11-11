@@ -3,12 +3,12 @@ from tensorflow.keras.applications.vgg16 import VGG16
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.models import Model
 
-def get_model(config, base_model_trainable=False):
+def get_model(config, base_model_trainable=True):
     """
         Create the RPN model from the config
         Args:
             config,                the configuration
-            base_model_trainable, whether to train the base model (defaults to False)
+            base_model_trainable, whether to train the base model (defaults to True)
         Returns:
             the Keras RPN model
     """
