@@ -1,18 +1,14 @@
 import tensorflow as tf
 
-def draw_image_batch(name, image_batch, max_images=-1):
+def draw_image_batch(name, image_batch, max_images=3):
     """
         Draws a image batch using TensorBoard
         Args:
             name,        a name for the resulting TensorBoard
             image_batch, the image batch to draw
             max_images,  the max amount of images to display
-                         if -1 displays 3 images
     """
-    if max_images != -1:
-        tf.summary.image(name, image_batch, max_outputs=max_images, step=0)
-    else:
-        tf.summary.image(name, image_batch, step=0)
+    tf.summary.image(name, image_batch, max_outputs=max_images, step=0)
 
 def convert_bounding_boxes_to_tf_format(bboxes):
     """
