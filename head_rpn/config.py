@@ -14,7 +14,9 @@ DEFAULT_CONFIGURATION_PROTO = {
     'region_count': 32,
 
     'high_threshold': 0.7,
-    'low_threshold': 0.3
+    'low_threshold': 0.3,
+
+    'variances': [0.1, 0.1, 0.2, 0.2]
 
 }
 

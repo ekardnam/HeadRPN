@@ -213,7 +213,7 @@ def get_bounding_boxes_from_labels(labels, config, threshold=0.5):
     mask = tf.greater(labels, threshold)
     return tf.where(tf.expand_dims(mask, axis=-1), batch_tensor(generate_anchors(config), batch_size), 0.0)
 
-def apply_deltas_to_bounding_boxes(bboxes, deltas):
+def apply_deltas_to_bounding_boxes(bboxes, deltas, config):
     """
         Applies the given deltas to the given bounding boxes
         Args:
@@ -221,9 +221,11 @@ def apply_deltas_to_bounding_boxes(bboxes, deltas):
                     has shape (batch_size, bbox_count, 4)
             deltas, a tensor containing batches of deltas
                     has shape (batch_size, bbox_count, 4)
+            config,  the configuration dictionary
         Returns:
             the batch of bounding boxes with the deltas applied
     """
+    deltas = deltas * config['variances']
     width = bboxes[..., 2] - bboxes[..., 0]
     height = bboxes[..., 3] - bboxes[..., 1]
     centre_x = 0.5 * (bboxes[..., 0] + bboxes[..., 2])

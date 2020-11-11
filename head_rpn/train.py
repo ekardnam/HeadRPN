@@ -79,6 +79,7 @@ def get_target(anchors, gt_boxes, config):
     output_height, output_width = config['output_size']
     anchor_count = config['anchor_count']
     region_count = config['region_count']
+    variances = config['variances']
 
     anchors_batch = batch_tensor(anchors, batch_size)
     iou_map = get_iou_map(anchors_batch, gt_boxes) # shape (batch_size, total_anchors, total_gt_boxes)
@@ -127,7 +128,7 @@ def get_target(anchors, gt_boxes, config):
     # replace non positve anchors with zeros
     gt_boxes_foreach_anchor = tf.where(tf.expand_dims(positive_anchors, -1), gt_boxes_foreach_anchor, 0.0)
 
-    deltas = get_regressor_deltas(anchors, gt_boxes_foreach_anchor)
+    deltas = get_regressor_deltas(anchors, gt_boxes_foreach_anchor) / variances 
 
     labels = tf.reshape(labels, [batch_size, output_height, output_width, anchor_count])
     deltas = tf.reshape(deltas, [batch_size, output_height, output_width, anchor_count * 4])
