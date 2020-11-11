@@ -19,43 +19,7 @@ from head_rpn.train import (
     classifier_loss,
     regressor_loss
 )
-
-def parse_example_proto(example_proto):
-    features = {
-        'image': tf.io.FixedLenFeature((), tf.string),
-        'image_width': tf.io.FixedLenFeature((), tf.int64),
-        'image_height': tf.io.FixedLenFeature((), tf.int64),
-        'object_count': tf.io.FixedLenFeature((), tf.int64),
-        'objects': tf.io.FixedLenFeature((), tf.string)
-    }
-    return tf.io.parse_single_example(example_proto, features)
-
-def parse_example_to_data(example, config, is_training):
-    image = tf.image.decode_jpeg(example['image'])
-    gt_boxes = tf.io.parse_tensor(example['objects'], out_type=tf.int32)
-    gt_boxes = normalize_bboxes(
-                gt_boxes,
-                tf.cast(example['image_height'], tf.float32),
-                tf.cast(example['image_width'], tf.float32)
-               )
-    image, gt_boxes = process_data(image, gt_boxes, config['image_height'], config['image_width'], apply_augmentation=is_training)
-    return image, gt_boxes
-
-def parse_data_to_target(image, gt_boxes, anchors, config):
-    return image, get_target(anchors, gt_boxes, config)
-
-def get_padded_shapes():
-    return ((None, None, None), (None, None))
-
-def create_data_pipeline(filenames, config, is_training=True):
-    AUTO = tf.data.experimental.AUTOTUNE
-    anchors = generate_anchors(config)
-    example_protos = tf.data.TFRecordDataset(filenames, num_parallel_reads=AUTO)
-    examples = example_protos.map(parse_example_proto, num_parallel_calls=AUTO)
-    data = examples.map(lambda example: parse_example_to_data(example, config, is_training), num_parallel_calls=AUTO)
-    data = data.padded_batch(config['batch_size'], padded_shapes=get_padded_shapes())
-    data = data.map(lambda image, gt_boxes: parse_data_to_target(image, gt_boxes, anchors, config))
-    return data.prefetch(AUTO)
+from head_rpn.pipeline import create_data_pipeline
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trains an RPN over a TFRecord dataset')
@@ -77,8 +41,8 @@ if __name__ == '__main__':
     val_filenames = tf.data.Dataset.list_files(args.wildcard_validation)
 
     config = get_configuration()
-    train_ds = create_data_pipeline(train_filenames, config)
-    val_ds = create_data_pipeline(val_filenames, config, is_training=False)
+    train_ds = create_data_pipeline(train_filenames, config).repeat()
+    val_ds = create_data_pipeline(val_filenames, config, is_training=False).repeat()
 
     model = get_model(config)
     model.compile(
