@@ -7,7 +7,7 @@ def get_model(config):
     """
         Create the RPN model from the config
         Args:
-            config,                the configuration
+            config,  the configuration dictionary
         Returns:
             the Keras RPN model
     """
