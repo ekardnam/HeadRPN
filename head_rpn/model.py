@@ -3,18 +3,16 @@ from tensorflow.keras.applications.vgg16 import VGG16
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.models import Model
 
-def get_model(config, base_model_trainable=True):
+def get_model(config):
     """
         Create the RPN model from the config
         Args:
             config,                the configuration
-            base_model_trainable, whether to train the base model (defaults to True)
         Returns:
             the Keras RPN model
     """
     image_height, image_width = config['image_height'], config['image_width']
     base_model = VGG16(include_top=False, input_shape=(image_height, image_width, 3))
-    base_model.trainable = base_model_trainable
     vgg16_feature_map = base_model.get_layer('block5_conv3').output
     output = Conv2D(512, (3, 3), activation='relu', padding='same', name='RPN_conv')(vgg16_feature_map)
     rpn_class = Conv2D(config['anchor_count'], (1, 1), activation='sigmoid', name='RPN_classifier')(output)
