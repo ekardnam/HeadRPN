@@ -14,7 +14,8 @@ from head_rpn.bbox import (
     get_bounding_boxes_from_labels,
     generate_anchors,
     normalize_bboxes,
-    apply_deltas_to_bounding_boxes
+    apply_deltas_to_bounding_boxes,
+    convert_bounding_boxes_to_tf_format
 )
 from head_rpn.config import get_configuration
 
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     labels, deltas = get_target(anchors, gt_boxes, config)
     predicted_boxes = get_bounding_boxes_from_labels(labels, config)
     predicted_boxes = apply_deltas_to_bounding_boxes(predicted_boxes, tf.reshape(deltas, [-1, 4]), config)
-    image_batch = draw_bounding_boxes(image_batch, predicted_boxes)
+    image_batch = draw_bounding_boxes(image_batch, convert_bounding_boxes_to_tf_format(predicted_boxes))
 
     writer = tf.summary.create_file_writer(args.out)
     with writer.as_default():

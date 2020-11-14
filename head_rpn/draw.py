@@ -18,11 +18,11 @@ def draw_bounding_boxes(image_batch, bboxes_batch, color=[1, 0, 0, 1]):
         Args:
             image_batch,  a tensor of shape (batch_size, height, width, channels)
             bboxes_batch, a tensor of shape (batch_size, total_bboxes, 4) containing normalized
-                          bounding boxes
+                          bounding boxes in tf format
             color,        the color in the form of a list of RGBA values normalized to 1
                           defaults to red ([1, 0, 0, 1])
         Returns:
             a batch of images with the corresponding bboxes drawn
     """
     colors = tf.constant([color], dtype=tf.float32)
-    return tf.image.draw_bounding_boxes(image_batch, convert_bounding_boxes_to_tf_format(bboxes_batch), colors)
+    return tf.image.draw_bounding_boxes(image_batch, bboxes_batch, colors)

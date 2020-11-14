@@ -8,7 +8,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
 from head_rpn.draw import draw_image_batch, draw_bounding_boxes
-from head_rpn.bbox import normalize_bboxes
+from head_rpn.bbox import normalize_bboxes, convert_bounding_boxes_to_tf_format
 
 def parse_example_proto(example_proto):
     features = {
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     i = 0
     for image_batch, gt_batch in data:
         print(f'[+] Processing batch {i}')
-        image_batch = draw_bounding_boxes(image_batch, gt_batch)
+        image_batch = draw_bounding_boxes(image_batch, convert_bounding_boxes_to_tf_format(gt_batch))
         with writer.as_default():
             draw_image_batch(f'Batch {i}', image_batch, max_images=args.max_imgs)
         i += 1
