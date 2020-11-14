@@ -1,5 +1,7 @@
 import tensorflow as tf
 
+from .bbox import convert_bounding_boxes_to_tf_format
+
 def draw_image_batch(name, image_batch, max_images=3):
     """
         Draws a image batch using TensorBoard
@@ -9,18 +11,6 @@ def draw_image_batch(name, image_batch, max_images=3):
             max_images,  the max amount of images to display
     """
     tf.summary.image(name, image_batch, max_outputs=max_images, step=0)
-
-def convert_bounding_boxes_to_tf_format(bboxes):
-    """
-        Converts bounding boxes from the format [x y x y] we used (bc we dumb)
-        to the format [y x y x] that tf uses (bc he smart)
-    """
-    return tf.stack([
-        bboxes[..., 1],
-        bboxes[..., 0],
-        bboxes[..., 3],
-        bboxes[..., 2]
-    ], axis=-1)
 
 def draw_bounding_boxes(image_batch, bboxes_batch, color=[1, 0, 0, 1]):
     """

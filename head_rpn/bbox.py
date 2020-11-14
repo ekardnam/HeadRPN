@@ -2,6 +2,18 @@ import tensorflow as tf
 
 from .data import batch_tensor
 
+def convert_bounding_boxes_to_tf_format(bboxes):
+    """
+        Converts bounding boxes from the format [x y x y] we used (bc we dumb)
+        to the format [y x y x] that tf uses (bc he smart)
+    """
+    return tf.stack([
+        bboxes[..., 1],
+        bboxes[..., 0],
+        bboxes[..., 3],
+        bboxes[..., 2]
+    ], axis=-1)
+
 def generate_base_anchors(config):
     """
         Generates the base anchor shapes from the data in configuration
