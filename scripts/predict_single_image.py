@@ -11,7 +11,8 @@ from head_rpn.model import get_model
 from head_rpn.config import get_configuration
 from head_rpn.bbox import (
     get_bounding_boxes_from_labels,
-    apply_deltas_to_bounding_boxes
+    apply_deltas_to_bounding_boxes,
+    convert_bounding_boxes_to_tf_format
 )
 from head_rpn.draw import (
     draw_bounding_boxes,
@@ -38,8 +39,17 @@ if __name__ == '__main__':
     labels, deltas = model.predict(image_batch)
     bboxes = get_bounding_boxes_from_labels(labels, config)
     bboxes = apply_deltas_to_bounding_boxes(bboxes, tf.reshape(deltas, [-1, 4]), config)
+    bboxes = convert_bounding_boxes_to_tf_format(bboxes)
 
-    output_image = draw_bounding_boxes(image_batch, bboxes)
+    bboxes = tf.squeeze(bboxes, [0]) # apparently after all the efforts done working with bbox batches
+                                     # tensorflow betrayed us and decided that nms should work on
+                                     # non batched boxes. lame
+    selected_indices = tf.image.non_max_suppression(bboxes, tf.reshape(labels, [-1]), tf.shape(bboxes)[0], iou_threshold=0.3)
+    selected_boxes = tf.gather(bboxes, selected_indices)
+
+    selected_boxes = tf.expand_dims(selected_boxes, axis=0) # now tensorflow wants the batches again
+                                                            # so lame
+    output_image = draw_bounding_boxes(image_batch, selected_boxes)
 
     writer = tf.summary.create_file_writer(args.out)
     with writer.as_default():
