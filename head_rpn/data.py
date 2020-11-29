@@ -19,12 +19,6 @@ def get_random_bool():
     """
     return tf.greater(tf.random.uniform((), dtype=tf.float32), 0.5)
 
-def get_random_int():
-    """
-        Generates a random int scalar tensor in a specific range
-    """
-    return tf.random.uniform((), dtype=tf.int64, minval=0, maxval=4)
-
 def horizontal_flip(image, gt_boxes):
     """
         Flips the image horizontally
@@ -77,10 +71,6 @@ def process_data(image, gt_boxes, height, width, apply_augmentation=False):
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(image, (height, width))
     if apply_augmentation:
-        random_int = get_random_int()
-        image, gt_boxes = tf.case([(tf.math.equal(0, random_int), lambda: (image, gt_boxes)),
-                                   (tf.math.equal(1, random_int), lambda: horizontal_flip(image, gt_boxes)),
-                                   (tf.math.equal(2, random_int), lambda: gaussian_noise(image, gt_boxes)),
-                                   (tf.math.equal(3, random_int), lambda: gaussian_noise(horizontal_flip(image, gt_boxes))])
-        #image, gt_boxes = tf.cond(get_random_bool(), lambda: horizontal_flip(image, gt_boxes), lambda: (image, gt_boxes))
+        image, gt_boxes = tf.cond(get_random_bool(), lambda: horizontal_flip(image, gt_boxes), lambda: (image, gt_boxes))
+        image, gt_boxes = tf.cond(get_random_bool(), lambda: gaussian_noise(image, gt_boxes), lambda: (image, gt_boxes))
     return image, gt_boxes
