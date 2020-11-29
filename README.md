@@ -1,4 +1,4 @@
-# HeadRPN
+# HeadRPN [![CodeFactor](https://www.codefactor.io/repository/github/ekardnam/headrpn/badge)](https://www.codefactor.io/repository/github/ekardnam/headrpn)
 
 An implementation of a RPN for head detection as proposed in [this paper](https://arxiv.org/pdf/1809.08766v1.pdf).
 
