@@ -55,8 +55,8 @@ def randomly_select_n_from_mask(mask, n):
     # This genius code is taken from:
     # https://github.com/FurkanOM/tf-rpn/blob/master/utils/train_utils.py#L50
     # and is licensed under the terms of the APACHE public license
-    max = tf.math.reduce_max(n) * 10
-    random_tensor = tf.random.uniform(tf.shape(mask), minval=1, maxval=max, dtype=tf.int32)
+    max_val = tf.math.reduce_max(n) * 10
+    random_tensor = tf.random.uniform(tf.shape(mask), minval=1, maxval=max_val, dtype=tf.int32)
     random_tensor = tf.multiply(random_tensor, tf.cast(mask, tf.int32))
     indices = tf.argsort(random_tensor, direction='DESCENDING')
     sorted_indices = tf.argsort(indices)
