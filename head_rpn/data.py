@@ -20,10 +20,10 @@ def get_random_bool():
     return tf.greater(tf.random.uniform((), dtype=tf.float32), 0.5)
 
 def get_random_int():
-    """ Generates a random int scalar tensor in
-        a specific range
     """
-    return tf.random.uniform( (), dtype=tf.int64, minval = 0, maxval = 4)
+        Generates a random int scalar tensor in a specific range
+    """
+    return tf.random.uniform((), dtype=tf.int64, minval=0, maxval=4)
 
 def horizontal_flip(image, gt_boxes):
     """
@@ -47,15 +47,16 @@ def horizontal_flip(image, gt_boxes):
     return flipped_image, flipped_gt_boxes
 
 def gaussian_noise(image, gt_boxes):
-    """ Applies color modifications to the images
-        args:
+    """
+        Applies color modifications to the images
+        Args:
              image, image tensor
              gt_boxes, normalized gt_boxes
-        return:
+        Returns:
              noised_image, color modified image tensor
              gt_boxes, normalized gt_boxes
     """
-    color_noise = tf.random.normal(tf.shape(image), 0.0 ,  0.2, tf.float32 )
+    color_noise = tf.random.normal(tf.shape(image), 0.0,  0.2, tf.float32)
     noised_image = tf.add(image, color_noise)
     return noised_image, gt_boxes
 
@@ -70,7 +71,8 @@ def process_data(image, gt_boxes, height, width, apply_augmentation=False):
             apply_augmentation, whether to apply data augmentation
         Returns:
             image, a tensor containing the image of shape (height, width, channels)
-            gt_boxes, a tensor containing normalized ground truth boxes of shape (gt_boxes_count, 4 [x1, y1, x2, y2])
+            gt_boxes, a tensor containing normalized ground truth boxes of
+            shape (gt_boxes_count, 4 [x1, y1, x2, y2])
     """
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(image, (height, width))
