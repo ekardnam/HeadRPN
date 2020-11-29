@@ -52,7 +52,7 @@ def gaussian_noise(image, gt_boxes):
     """
     color_noise = tf.random.normal(tf.shape(image), 0.0,  0.2, tf.float32)
     noised_image = tf.add(image, color_noise)
-    return noised_image, gt_boxes
+    return tf.clip_by_value(noised_image, 0.0, 1.0), gt_boxes
 
 def process_data(image, gt_boxes, height, width, apply_augmentation=False):
     """
