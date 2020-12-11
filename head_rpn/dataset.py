@@ -49,11 +49,11 @@ def _map_object_node_to_bbox(object_node):
     ymax = int(bbox_node.find('ymax').text)
     return [xmin, ymin, xmax, ymax]
 
-def annotation_from_skut_xml_file(basepath, filename):
+def annotation_from_xml_file(basepath, filename):
     filepath = os.path.join(basepath, filename)
     xml_tree = ET.parse(filepath)
     root = xml_tree.getroot()
-    filename = f'{os.path.splitext(filename)[0]}.jpg'
+    filename = f'{os.path.splitext(filename)[0]}.jpeg'
     size = root.find('size')
     width = int(size.find('width').text)
     height = int(size.find('height').text)
@@ -66,15 +66,15 @@ def annotation_from_skut_xml_file(basepath, filename):
         'objects': gt_boxes
     }
 
-def load_scut_annotations(annotations_folder):
+def load_xml_annotations(annotations_folder):
     """
-        Loads the SKUT head dataset for head detection
+        Loads the scut head dataset for head detection
         Args:
             anotations_folder, the path to the folder containing annotations to load
         Returns:
             a list of image annotation dictionaries
     """
-    return [annotation_from_skut_xml_file(annotations_folder, filename) for filename in os.listdir(annotations_folder)]
+    return [annotation_from_xml_file(annotations_folder, filename) for filename in os.listdir(annotations_folder)]
 
 def _apply_basepath_to_annotation(annotation, basepath):
     return  {

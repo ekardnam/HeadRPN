@@ -9,7 +9,7 @@ import tensorflow as tf
 
 from head_rpn.dataset import (
     load_kaggle_annotations,
-    load_scut_annotations,
+    load_xml_annotations,
     aggregate_annotations
 )
 from head_rpn.draw import draw_image_batch
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     # load the kaggle annotations
     kaggle_annotations = load_kaggle_annotations(args.labels, args.boxes)
-    scut_annotations = load_scut_annotations(args.scut_annotations_folder)
+    scut_annotations = load_xml_annotations(args.scut_annotations_folder)
 
     annotations = aggregate_annotations(
                                         [kaggle_annotations, scut_annotations],
