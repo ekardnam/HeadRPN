@@ -50,7 +50,7 @@ def gaussian_noise(image, gt_boxes):
              noised_image, color modified image tensor
              gt_boxes, normalized gt_boxes
     """
-    color_noise = tf.random.normal(tf.shape(image), 0.0,  0.2, tf.float32)
+    color_noise = tf.random.normal(tf.shape(image), 0.0,  0.1, tf.float32)
     noised_image = tf.add(image, color_noise)
     return tf.clip_by_value(noised_image, 0.0, 1.0), gt_boxes
 
