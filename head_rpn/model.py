@@ -3,6 +3,10 @@ from tensorflow.keras.applications.vgg16 import VGG16
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.models import Model
 from tensorflow.keras.models import load_model
+from .train import classifier_loss, regressor_loss
+
+custom_objs = {'classifier_loss': classifier_loss, 
+              'regressor_loss': regressor_loss }
 
 def get_model(config):
     """
@@ -37,7 +41,7 @@ def get_regularized_model(config):
     return Model(inputs=base_model.input, outputs=[rpn_class, rpn_regr])
 
 def get_model_for_tuning(name, custom_obj):
-    model = load_model(name, custom_obj)
+    model = load_model(name, custom_objects = custom_obj)
     for layer in model.layers:
         if (layer.name == 'block5_conv1' or layer.name == 'block5_conv2' 
            or layer.name == 'block5_conv3' or layer.name == 'RPN_conv' or layer.name == 'RPN_classifier'
