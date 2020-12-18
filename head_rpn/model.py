@@ -45,7 +45,7 @@ def get_regularized_model(config):
     rpn_regr = Conv2D(config['anchor_count'] * 4, (1, 1), activation='linear', name='RPN_regressor')(output)
     return Model(inputs=base_model.input, outputs=[rpn_class, rpn_regr])
 
-def get_model_for_tuning(name, custom_obj):
+def get_model_for_tuning(name):
   """
         Loads the RPN model trained previously for fine_tuning
         Here we let the chanche to load either the model with 
@@ -59,9 +59,8 @@ def get_model_for_tuning(name, custom_obj):
     """
     model = load_model(name, custom_objects = custom_obj)
     for layer in model.layers:
-        if (layer.name == 'block5_conv1' or layer.name == 'block5_conv2' 
-           or layer.name == 'block5_conv3' or layer.name == 'RPN_conv' or layer.name == 'RPN_classifier'
-           or layer.name == 'RPN_regressor'):
+        if (layer.name in ['block5_conv1', 'block5_conv2', 'block5_conv3', 
+                           'RPN_conv', 'RPN_classifier', 'RPN_regressor']):
               layer.trainable = True
            else:
               layer.trainable = False
