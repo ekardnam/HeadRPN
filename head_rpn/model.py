@@ -40,7 +40,7 @@ def get_regularized_model(config):
     return Model(inputs=base_model.input, outputs=[rpn_class, rpn_regr])
 
 def get_model_for_tuning(name):
-  """
+    """
         Loads the RPN model trained previously for fine_tuning
         Here we let the chanche to load either the model with
         L2 regularization or the other model
